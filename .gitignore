@@ -1,0 +1,69 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Next.js
+.next/
+out/
+build/
+.vercel/
+
+# React Native / Mobile
+.expo/
+*.jks
+*.keystore
+mobile/node_modules/
+
+# Hardhat
+hardhat/artifacts/
+hardhat/cache/
+hardhat/typechain-types/
+hardhat/node_modules/
+
+# Backend
+backend/dist/
+backend/node_modules/
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Misc
+*.pem
+build_log.txt
+# =========================================
+# Zero-Knowledge & Circom Artifacts
+# =========================================
+# Ignore massive Powers of Tau files
+*.ptau
+
+# Ignore raw circuit build directories and intermediate files
+circuits/*_js/
+circuits/*_cpp/
+circuits/*.sym
+circuits/build/
+circuits/pot/
