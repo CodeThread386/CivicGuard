@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  googleId      String?  @unique  // optional: only for Google users
+  email         String   @unique
+  passwordHash  String?  // for email/password login
+  name          String?
+  picture       String?
+  walletAddress String?  @unique
+  did           String?  @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  credentials     Credential[]
+  verifications   Verification[]
+  digilockerToken DigiLockerToken?
+
+  @@index([email])
+  @@index([walletAddress])
+  @@map("users")
+}
+
+model Credential {
+  id             String    @id @default(uuid())
+  userId         String
+  credentialType String
+  issuerDID      String
+  issuerName     String
+  credentialHash String    @unique
+  issuanceDate   DateTime
+  expirationDate DateTime?
+  revoked        Boolean   @default(false)
+  source         String
+  vcJwt          String
+  metadata       String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([credentialType])
+  @@index([issuerDID])
+  @@index([revoked])
+  @@map("credentials")
+}
+
+model Verification {
+  id             String    @id @default(uuid())
+  verificationId String    @unique
+  verifierDID    String?
+  holderDID      String?
+  holderId       String?
+  requestedTypes String
+  purpose        String?
+  challenge      String
+  status         String    @default("pending")
+  result         String?
+  createdAt      DateTime  @default(now())
+  completedAt    DateTime?
+  expiresAt      DateTime
+
+  holder User? @relation(fields: [holderId], references: [id], onDelete: Cascade)
+
+  @@index([verificationId])
+  @@index([holderDID])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("verifications")
+}
+
+model IssuerMetadata {
+  id         String   @id @default(uuid())
+  issuerDID  String   @unique
+  name       String
+  domain     String?
+  trustScore Int      @default(50)
+  isActive   Boolean  @default(true)
+  isVerified Boolean  @default(false)
+  totalIssued  Int    @default(0)
+  totalRevoked Int    @default(0)
+  lastSynced DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([issuerDID])
+  @@index([isActive])
+  @@map("issuer_metadata")
+}
+
+model DigiLockerToken {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("digilocker_tokens")
+}
+
+model VerificationHistory {
+  id              String   @id @default(uuid())
+  verificationId  String
+  holderDID       String
+  verifierDID     String?
+  credentialTypes String
+  success         Boolean
+  timestamp       DateTime @default(now())
+
+  @@index([holderDID])
+  @@index([timestamp])
+  @@map("verification_history")
+}
+
