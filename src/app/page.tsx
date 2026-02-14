@@ -19,10 +19,10 @@ export default function HomePage() {
             Volunteer Portal
           </Link>
           <Link
-            href="/ngo"
+            href="/verifier"
             className="block w-full py-3 px-6 rounded-lg border-2 border-primary text-primary font-medium hover:bg-slate-100 transition"
           >
-            NGO Command Center
+            Verifier
           </Link>
         </div>
 

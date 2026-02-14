@@ -2,106 +2,31 @@
 pragma solidity ^0.8.24;
 
 contract CivicGuardRegistry {
-    struct Issuer {
-        string issuerDID;
-        string name;
-        string domain;
-        uint8 trustScore;
-        bool isActive;
-        bool isVerified;
-        uint256 totalIssued;
-        uint256 totalRevoked;
+    // Mapping: PublicHash -> List of Roles (e.g., "DOCTOR", "DRIVER")
+    mapping(uint256 => string[]) public volunteerRoles;
+    
+    // The Government/NGO Admin
+    address public admin;
+
+    event RoleAssigned(uint256 indexed publicHash, string role);
+
+    constructor() {
+        admin = msg.sender;
     }
 
-    address public owner;
-    mapping(string => Issuer) private issuers;
-
-    event IssuerRegistered(string issuerDID, string name, string domain);
-    event IssuerUpdated(string issuerDID, uint8 trustScore, bool isActive, bool isVerified);
-    event CredentialIssued(string issuerDID, bytes32 credentialHash);
-    event CredentialRevoked(string issuerDID, bytes32 credentialHash);
-
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not owner");
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "Only Admin can assign roles");
         _;
     }
 
-    constructor() {
-        owner = msg.sender;
+    // 1. Assign a Role (e.g., "DOCTOR") to a Volunteer's Public Hash
+    function addRole(uint256 publicHash, string memory role) external onlyAdmin {
+        volunteerRoles[publicHash].push(role);
+        emit RoleAssigned(publicHash, role);
     }
 
-    function registerIssuer(
-        string calldata issuerDID,
-        string calldata name,
-        string calldata domain,
-        uint8 trustScore,
-        bool isVerified
-    ) external onlyOwner {
-        require(bytes(issuerDID).length > 0, "issuerDID required");
-        Issuer storage issuer = issuers[issuerDID];
-        issuer.issuerDID = issuerDID;
-        issuer.name = name;
-        issuer.domain = domain;
-        issuer.trustScore = trustScore;
-        issuer.isActive = true;
-        issuer.isVerified = isVerified;
-
-        emit IssuerRegistered(issuerDID, name, domain);
-    }
-
-    function updateIssuer(
-        string calldata issuerDID,
-        uint8 trustScore,
-        bool isActive,
-        bool isVerified
-    ) external onlyOwner {
-        Issuer storage issuer = issuers[issuerDID];
-        require(bytes(issuer.issuerDID).length > 0, "Issuer not found");
-        issuer.trustScore = trustScore;
-        issuer.isActive = isActive;
-        issuer.isVerified = isVerified;
-
-        emit IssuerUpdated(issuerDID, trustScore, isActive, isVerified);
-    }
-
-    function markIssued(string calldata issuerDID, bytes32 credentialHash) external onlyOwner {
-        Issuer storage issuer = issuers[issuerDID];
-        require(bytes(issuer.issuerDID).length > 0, "Issuer not found");
-        issuer.totalIssued += 1;
-        emit CredentialIssued(issuerDID, credentialHash);
-    }
-
-    function markRevoked(string calldata issuerDID, bytes32 credentialHash) external onlyOwner {
-        Issuer storage issuer = issuers[issuerDID];
-        require(bytes(issuer.issuerDID).length > 0, "Issuer not found");
-        issuer.totalRevoked += 1;
-        emit CredentialRevoked(issuerDID, credentialHash);
-    }
-
-    function getIssuer(string calldata issuerDID)
-        external
-        view
-        returns (
-            string memory name,
-            string memory domain,
-            uint8 trustScore,
-            bool isActive,
-            bool isVerified,
-            uint256 totalIssued,
-            uint256 totalRevoked
-        )
-    {
-        Issuer storage issuer = issuers[issuerDID];
-        require(bytes(issuer.issuerDID).length > 0, "Issuer not found");
-        return (
-            issuer.name,
-            issuer.domain,
-            issuer.trustScore,
-            issuer.isActive,
-            issuer.isVerified,
-            issuer.totalIssued,
-            issuer.totalRevoked
-        );
+    // 2. Fetch ALL roles for verification (Karan uses this)
+    function getRoles(uint256 publicHash) external view returns (string[] memory) {
+        return volunteerRoles[publicHash];
     }
 }
-

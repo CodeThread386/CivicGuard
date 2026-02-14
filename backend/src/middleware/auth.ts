@@ -22,3 +22,16 @@ export function authMiddleware(req: AuthedRequest, res: Response, next: NextFunc
   }
 }
 
+// backend/src/middleware/auth.ts
+
+export function requireAdmin(req: AuthedRequest, res: Response, next: NextFunction) {
+  // Simple check: Is the user's email authorized?
+  // In a real app, check a database role or specific admin emails
+  const adminEmails = ["admin@vit.ac.in", "gov@india.gov.in"]; // Add your testing email here
+  
+  if (!req.user || !adminEmails.includes(req.user.email)) {
+    return res.status(StatusCodes.FORBIDDEN).json({ error: "Admin access required" });
+  }
+  
+  next();
+}

@@ -126,3 +126,27 @@ model VerificationHistory {
   @@map("verification_history")
 }
 
+model ManualVerificationRequest {
+  id          String   @id @default(uuid())
+  userId      String
+  documentUrl String   // URL to the uploaded PDF (S3/IPFS)
+  docType     String   // e.g., "DEGREE", "EMPLOYMENT_LETTER"
+  issuerId    String   // The ID of the "Magic Button" selection (e.g., "VIT_VELLORE")
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  adminNotes  String?  // "Verified with Roll No 123"
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+model ManualVerificationRequest {
+  id          String   @id @default(uuid())
+  userId      String
+  documentUrl String
+  docType     String
+  issuerId    String
+  status      String   @default("PENDING")
+  adminNotes  String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
